@@ -1,0 +1,14 @@
+@media screen{
+:root{--primary:#087ec9;--primary-hover:#065fa6;--blue:#087ec9;--nav-blue:#123961;--bg-body:#eff5fc;--bg:#eff5fc;--border-color:#cedfeb;--line:#cedfeb;--text-main:#173452;--text:#173452;--shadow:0 2px 7px #183f6717}
+body{background:#eff5fc}
+body :is(.products-section,.cart-table-wrapper,.payment-methods-card,.action-summary-bar,.invoice-meta-bar,.modal-content,.card,.stat,.modal){border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);background:linear-gradient(160deg,#fff 64%,#f3f8ff)}
+body :is(.form-control,.field input,.field select,.db-filter select,.w50-select-button){border:1px solid #c8dbeb;border-radius:8px;background:#fff;color:#193b59}
+body :is(.form-control,input,select,button):focus-visible{outline:2px solid #289bd7;outline-offset:2px}
+body .product-card{background:linear-gradient(156deg,#fff,#f6faff);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow)}
+body :is(.btn-pay-submit,.btn.primary,.pay-tab.active,.btn-add-card){background:linear-gradient(110deg,#0966be,#008ad4);border-color:#0873be;color:white;border-radius:8px}
+body :is(.cart-table,.table) th{background:#eaf3fb;color:#234462}
+body .side{background:linear-gradient(160deg,#163c68,#09274e);box-shadow:none}
+body .nav button.active{background:#087ac7;color:#fff}
+body .brand img{background:#fff}
+body .cart-checkout-section,body .products-section{min-width:0}
+}
