@@ -1,7 +1,7 @@
 'use strict';
 (() => {
  const sections = {
-  home:['لوحة التحكم','dashboard','dashboard'],
+  home:['الرئيسية','dashboard','dashboard'],
   sell:['المبيعات والأرباح','sales','pos'],
   stock:['إدارة المخزون والمشتريات','inventory','products'],
   debt:['العملاء والديون','parties','parties'],
@@ -107,7 +107,7 @@
     for(const due of dues){const key=due.date&&due.date<now?'late':due.date&&due.date<=cutoff.toISOString().slice(0,10)?'soon':'later';byDue[key]+=due.remaining}
    }
    metrics=[metric('عدد العملاء',clients.length,'parties'),metric('إجمالي الديون',moneyText(total),'vouchers'),metric('مستحق خلال 30 يوماً',moneyText(byDue.soon),'invoices'),metric('إجمالي التحصيلات',moneyText(sum(docs,receipts)),'reports')];
-   panels=[panel('أبرز العملاء','parties',tableView(['العميل','الرصيد'],ranked.slice(0,4).map(r=>['<button data-statement="'+esc(r.p.id)+'">'+esc(r.p.name)+'</button>',moneyText(r.v)]))),chart('حركة التحصيلات',[series('التحصيل',receipts)],true)];
+   panels=[panel('أبرز العملاء','parties',tableView(['العميل','الرصيد'],ranked.slice(0,5).map(r=>['<button data-statement="'+esc(r.p.id)+'">'+esc(r.p.name)+'</button>',moneyText(r.v)]))),chart('حركة التحصيلات',[series('التحصيل',receipts)],true)];
    summary=panel('إجمالي الأرصدة','vouchers','<strong>'+moneyText(total)+'</strong>');
    panels.push(summary,panel('استحقاقات الفواتير الحالية','invoices','<div class="ref-states">'+[['أخرى',byDue.later],['خلال 30 يوماً',byDue.soon],['متأخرة',byDue.late]].map(([t,v])=>'<div>'+t+'<b>'+moneyText(v)+'</b></div>').join('')+'</div>'));
   }else{
@@ -117,7 +117,7 @@
    summary=panel('صافي الربح','vouchers','<strong>'+moneyText(financial.net)+'</strong>','ref-profit');panels.push(summary);
   }
   const tiles=domainLinks[section].map(item=>link(item,'ref-tile')).join('');
-  return '<div class="ref-board"><svg width="0" height="0" aria-hidden="true" style="position:absolute"><defs><linearGradient id="ref-bars" x2="0" y2="1"><stop stop-color="#16b6f1"/><stop offset="1" stop-color="#036bc9"/></linearGradient></defs></svg><div class="ref-heading"><div><h1>'+(section==='home'?'مرحباً بك في التمام برو':sections[section][0])+'</h1><small>'+(section==='home'?'لوحة التحكم':esc(S.settings.company))+'</small></div><button data-action="filter">'+icon('filter')+' تصفية</button></div><div class="ref-mobile"><div class="ref-tiles">'+tiles+'</div>'+(mobileValue?panel(mobileValue,'reports','<strong>'+moneyText(financial.net)+'</strong>','ref-profit'):'')+summary+'</div><div class="ref-desktop"><div class="ref-metrics">'+metrics.map(([t,v,k])=>'<div class="ref-metric">'+glyph(k)+'<span>'+esc(t)+'</span><strong>'+v+'</strong></div>').join('')+'</div><div class="ref-panels">'+panels.join('')+'</div>'+(section==='home'?'':'<div class="ref-actions">'+tiles+'</div>')+'</div></div>';
+  return '<div class="ref-board"><svg width="0" height="0" aria-hidden="true" style="position:absolute"><defs><linearGradient id="ref-bars" x2="0" y2="1"><stop stop-color="#16b6f1"/><stop offset="1" stop-color="#036bc9"/></linearGradient></defs></svg><div class="ref-heading"><div><h1>'+(section==='home'?'مرحباً بك في التمام برو':sections[section][0])+'</h1><small>'+(section==='home'?'الرئيسية':esc(S.settings.company))+'</small></div><button data-action="filter">'+icon('filter')+' تصفية</button></div><div class="ref-mobile"><div class="ref-tiles">'+tiles+'</div>'+(mobileValue?panel(mobileValue,'reports','<strong>'+moneyText(financial.net)+'</strong>','ref-profit'):'')+summary+'</div><div class="ref-desktop"><div class="ref-metrics">'+metrics.map(([t,v,k])=>'<div class="ref-metric">'+glyph(k)+'<span>'+esc(t)+'</span><strong>'+v+'</strong></div>').join('')+'</div><div class="ref-panels">'+panels.join('')+'</div>'+(section==='home'?'':'<div class="ref-actions">'+tiles+'</div>')+'</div></div>';
  }
  const originalDashboard=dashboard;
  dashboard=function(){return route==='dashboard'?board():originalDashboard()};
@@ -142,6 +142,7 @@
   append('التقارير',reportList.filter(([id])=>!['repDetail','trading','inventoryDetail','cashierShifts','popular'].includes(id)).map(([id,title])=>[title,'report:'+id,'reports']));
   append('الأصناف',[['مجموعات الأصناف','master:productGroups','layers'],['الماركات','master:brands','products'],['الضمانات','master:warranties','receipt'],['الضمانات السارية','action:activeWarranties','receipt']]);
   append('المحاسبة',[['دفتر اليومية','action:journals','invoices'],['الصناديق والحسابات','action:paymentAccounts','cash'],['السنوات والفترات المالية','action:fiscalYears','calendar']]);
+  if(w34Manager())append('الأصناف',[['إدارة الفروع والمخازن','action:branchDirectory','products']]);
   if(w34Manager())append('المستخدمين',[['حسابات الدخول والصلاحيات','users:accounts','employees']]);
   const seen=new Set(groups.flatMap(g=>g[2].map(item=>item[1])));
   const missing=nav.filter(([key])=>!seen.has('#'+key)&&key!=='more');
@@ -212,6 +213,11 @@
   const alternate=smallScreen.matches&&document.querySelector('#content .v19-cashier-header,#content .v19-pagebar');
   const host=alternate||tools;
   if(menuButton.parentElement!==host)host.append(menuButton);
+  let held=document.getElementById('tm-header-held');
+  if(route==='pos'&&!smallScreen.matches){
+   if(!held){held=document.createElement('button');held.type='button';held.id='tm-header-held';held.onclick=()=>actions.drafts();tools.prepend(held)}
+   held.textContent='المعلّقة ('+S.drafts.filter(d=>d.kind===(window.WatheeqCashierKind==='purchase'?'purchase':'sale')).length+')';
+  }else held?.remove();
   sidebar();
   document.getElementById('ref-page-name').textContent=route==='dashboard'?'':(nav.find(([key])=>key===route)?.[1]||'');
   document.body.classList.toggle('ref-home',route==='dashboard');

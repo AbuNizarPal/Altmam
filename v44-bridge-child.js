@@ -134,7 +134,7 @@
   if($('product-search')?.value!==currentSearch)$('product-search').value=currentSearch;
  }finally{syncing=false}}
  function fixTotals(){if(!state)return;const t=state.totals;
-  for(const [id,val]of [['lbl-count',t.count],['lbl-qty',t.quantity],['lbl-discount',amount(t.discount)],['lbl-tax',amount(t.tax)],['lbl-grand-total',amount(t.total)]])if($(id))$(id).textContent=val;
+  for(const [id,val]of [['lbl-count',t.count],['lbl-qty',state.kind==='purchase'||t.profit==null?'—':amount(t.profit)],['lbl-discount',amount(t.discount)],['lbl-tax',amount(t.tax)],['lbl-grand-total',amount(t.total)]])if($(id))$(id).textContent=val;
   const cc=$('curr-symbol');if(cc)cc.textContent=currSym(state.baseCurrency);
   document.querySelectorAll('#cart-rows tr').forEach((tr,i)=>{const l=state.cart[i];if(l&&tr.cells[7])tr.cells[7].textContent=currSym(state.baseCurrency)+' '+amount(l.qty*l.price-l.discount)});
   if(currentPayMethod==='cash'&&$('cash-received')&&document.activeElement!==$('cash-received')){$('cash-received').value=amount(t.total/(state.rate||1));calcCashReturn()}

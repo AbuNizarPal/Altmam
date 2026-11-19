@@ -207,12 +207,11 @@
   document.body.classList.toggle('w36-desktop',isLaptop());
   if(!isLaptop())return;
   // Remove duplicated page titles, preserving filters, adds and exports.
-  const header=document.querySelector('main > header');
-  let actionsBar=$('#w36PageActions');if(!actionsBar){actionsBar=document.createElement('div');actionsBar.id='w36PageActions';header.append(actionsBar)}
+  let actionsBar=$('#w36PageActions');if(!actionsBar){actionsBar=document.createElement('div');actionsBar.id='w36PageActions';$('#ref-page-name').after(actionsBar)}
   actionsBar.replaceChildren();
   const head=$('#content .page-head');
   if(head){
-   const buttons=head.querySelectorAll(':scope > .actions > *,:scope > button');
+   const buttons=head.querySelectorAll(':scope > .actions > *,:scope > button,:scope > .w24-tools,:scope > .w25-searchbox');
    buttons.forEach(b=>actionsBar.appendChild(b));
    head.remove();
   }

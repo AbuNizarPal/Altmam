@@ -3,7 +3,7 @@
    Animations follow the screen refresh rate; no hardcoded frame timers. */
 const moreSectionsV18 = [
  ['الأعمال','pos',[
-  ['لوحة المتابعة','#dashboard','dashboard'],['الكاشير','#pos','pos'],['الطلبيات','#orders','orders'],['الأقساط','#installments','calendar']]],
+  ['الرئيسية','#dashboard','dashboard'],['الكاشير','#pos','pos'],['الطلبيات','#orders','orders'],['الأقساط','#installments','calendar']]],
  ['الأصناف','products',[
   ['إضافة صنف','add:products','plus'],['كل الأصناف','#products','products'],['المتغيرات والمجموعات','#catalog','layers'],['المخازن والجرد','#inventory','inventory'],['التصنيع والأصول','#manufacture','manufacture'],['سجل الهالك','#damage','damage']]],
  ['المبيعات','invoices',[

@@ -19,9 +19,16 @@
   amount=Math.max(0,discountKind==='pct'?Math.round(total*Math.min(10000,amount)/10000):amount);amount=Math.min(amount,total);
   let remaining=amount,remainingBase=total;cart.forEach((l,i)=>{const portion=remainingBase?Math.min(allowed[i],Math.round(remaining*allowed[i]/remainingBase)):0;l.discount=(l.discount||0)+portion;l.w41GlobalDiscount=portion;remaining-=portion;remainingBase-=allowed[i]});
  }
- function totalInfo(){let gross=0,tax=0,discount=0,quantity=0;
-  cart.forEach(l=>{const p=find('products',l.product);if(!p)return;const base=E.md(l.qty,l.price,1000);const d=Math.min(base,l.discount||0),net=base-d;gross+=base;discount+=d;tax+=E.md(net,p.tax||0,10000);quantity+=l.qty/1000});
-  return {gross:normMoney(gross),tax:normMoney(tax),discount:normMoney(discount),quantity,total:normMoney(gross-discount+tax),count:cart.length};
+ function totalInfo(){let gross=0,tax=0,discount=0,quantity=0,cost=0;
+  const warehouse=session.getItem('posWarehouse')||S.settings.defaultWarehouse||S.warehouses[0]?.id||'main';
+  const remaining=new Map();let known=true;
+  cart.forEach(l=>{const p=find('products',l.product);if(!p)return;const base=E.md(l.qty,l.price,1000);const d=Math.min(base,l.discount||0),net=base-d;gross+=base;discount+=d;tax+=E.md(net,p.tax||0,10000);quantity+=l.qty/1000;
+   if(p.type==='service')return;
+   const stock=remaining.get(p.id)||{...E.stock(S,p.id,warehouse)},units=E.md(l.qty,p.units[l.unit].factor,1000);
+   if(stock.qty<=0||stock.qty<units){known=false;return}
+   const used=E.md(stock.value,units,stock.qty);cost+=used;stock.qty-=units;stock.value-=used;remaining.set(p.id,stock);
+  });
+  return {profit:known?normMoney(gross-discount-cost):null,gross:normMoney(gross),tax:normMoney(tax),discount:normMoney(discount),quantity,total:normMoney(gross-discount+tax),count:cart.length};
  }
  const codePoint=(p)=>p?.units?.[0]?.barcode||p?.code||'';
  function snapshot(){if(!S)return null;const tenant=window.WatheeqAuth?.identity?.companyId||'';if(tenant!==activeTenant){activeTenant=tenant;globalDiscount='';discountKind='val';payRows=[];payMode='cash';priceGroup='retail';allowNegative=false;lastInvoiceNumber='جديدة'}const curr=w34Pay.currency||S.settings.currency,wh=session.getItem('posWarehouse')||S.settings.defaultWarehouse||S.warehouses[0]?.id||'main';
