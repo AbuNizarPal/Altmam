@@ -1,0 +1,39 @@
+@media screen and (min-width:1024px){
+ body.ref-ui.w36-desktop main>:is(#w36PageActions,#w33HeaderActions):not(:empty){display:flex!important;align-items:center;flex-wrap:wrap;gap:7px;margin:6px 206px 6px 16px}
+ body.ref-ui.w36-desktop main>:is(#w36PageActions,#w33HeaderActions):empty{display:none!important}
+ body.ref-ui.w36-desktop main>:is(#w36PageActions,#w33HeaderActions) button{display:inline-flex!important;align-items:center;justify-content:center;gap:5px;width:auto!important;min-width:34px;min-height:33px;height:auto!important;max-width:none!important;padding:5px 10px!important;background:#eaf3fa!important;color:#173955!important;border:1px solid #aec5d7!important;border-radius:7px;font-size:14px!important;line-height:1.45;opacity:1!important}
+ body.ref-ui.w36-desktop main>:is(#w36PageActions,#w33HeaderActions) button:is(.primary,[data-new],[data-add]){background:#086aaa!important;color:white!important}
+ body.ref-ui.w36-desktop main>:is(#w36PageActions,#w33HeaderActions) button :is(svg,span,b){color:inherit!important}
+ body.ref-ui.w36-desktop main>header #tm-header-held{display:inline-flex!important;width:auto!important;min-width:max-content!important;padding:5px 11px!important;background:#125c91!important;color:#fff!important;border-radius:8px}
+ body.ref-ui #content :is(.v19-report-shell,.v19-report-body){min-height:0!important}
+ body.ref-ui #content .v19-report-body{padding:12px!important;gap:12px!important}
+ body.ref-ui #content .v19-pagebar{height:48px!important;min-height:0!important}
+ body.ref-ui #content .v19-pagebar h1{font-size:18px}
+ body.ref-ui #content :is(.v19-popular-list,.v19-stock-list,.v19-cashier-list,.e52-grid){display:grid!important;grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr))!important;gap:10px!important;align-items:start}
+ body.ref-ui #content :is(.v19-stock-card,.v19-popular-card,.v19-shift-record,.e52-card,.panel,.stat){min-height:0;padding:12px!important}
+ body.ref-ui #content .v19-stock-name{margin:0 0 4px;padding:0}
+ body.ref-ui #content .v19-stock-name :is(h2,small){padding:3px 8px;min-width:0}
+ body.ref-ui #content :is(.v19-intro,.v19-panel-head,.v19-panel-rows){padding:10px 14px!important;gap:6px}
+ body.ref-ui #content .v19-green-card{min-height:56px;padding:6px 14px}
+ body.ref-ui #content .v19-green-icon{width:38px;height:38px}
+ body.ref-ui #content :is(.v19-stock-line,.v19-report-row){min-height:32px;margin:0;padding-block:3px}
+ body.ref-ui #content .v19-searchline{padding:5px 10px}
+ body.ref-ui #content .v19-report-body:has(.v19-intro){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+ body.ref-ui #content .v19-report-body>.v19-report-period{grid-column:1/-1}
+ body.ref-ui #content :is(.empty,.v19-empty){min-height:100px!important;padding:18px!important}
+ body.ref-ui #content .empty-icon{width:50px!important;height:50px!important;font-size:25px!important}
+ body.ref-ui #content .e52 .e52-summary{background:#12456d!important;color:white!important}
+ body.ref-ui #content .e52 .e52-summary :is(h2,p,b,strong,small,span){color:white!important;opacity:1!important}
+ body.ref-ui #content .e52 .e52-summary .e52-live{background:#245c7c!important}
+ body.ref-ui #modal:not([hidden]):has(#unitsRows,#w55PurchaseDiscount){position:fixed!important;inset:0!important;width:100%!important;height:100dvh!important;display:block!important;transform:none!important;max-width:none!important;padding:0!important;background:#f4f8fc!important;backdrop-filter:none!important;z-index:1200!important}
+ body.ref-ui #modal:has(#unitsRows,#w55PurchaseDiscount) #modalForm{width:100%!important;max-width:none!important;height:100%!important;max-height:none!important;margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+ body.ref-ui #modal:has(#unitsRows,#w55PurchaseDiscount) #modalBody{width:100%!important;max-width:none!important;margin:0!important;flex:1;min-height:0;padding:16px clamp(16px,3vw,48px)!important;overflow:auto!important}
+}
+body.ref-ui #modal .modal-head{background:#1466b4!important;background-image:none!important;color:white!important}
+body.ref-ui #modal .modal-head :is(h2,small){color:white!important}
+body.ref-ui #modal .modal-head button{background:#fff!important;color:#124e88!important}
+body.ref-ui #modal:not([hidden]):has(#branchStock){position:fixed!important;inset:0!important;width:100%!important;height:100dvh!important;max-width:none!important;transform:none!important;padding:0!important;display:block!important;z-index:1200!important}
+body.ref-ui #modal:has(#branchStock) #modalForm{width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;border-radius:0!important;margin:0!important}
+#modal:has(#branchStock) #modalBody{flex:1;overflow:auto}
+.branch-product :is(select,.select-trigger){display:none!important}
+.branch-results:empty{display:none}.branch-results{max-height:10rem;overflow:auto}.branch-results button{display:block;width:100%}
