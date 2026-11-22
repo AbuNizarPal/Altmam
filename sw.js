@@ -1,39 +1,68 @@
-'use strict';
-const CACHE='rawan-erp-static-tamam-branches-4';
-const MEDIA_CACHE='rawan-erp-seen-photos-v1';
-const FILES=['./branch-stock.js','./desktop-workspace.css','./purchase-recovery.js','./tamam.js','./customer.html','./customer-portal.js','./portal-data.js','./معتمد.html','./brand-logo.webp','./p2p-palpay.jpg','./p2p-bank-palestine.jpg','./shared-c50d51a1a3c0.jpg','./shared-17a3c04d5aba.jpg','./reference-workspaces.css','./reference-ui.js','./reference-ui.css','./watheeq-mark.webp','./v55-purchase-discount.js','./v54-invoices.js','./v54-cashier.js','./v54-swipe.js','./v54-ui.css','./v53-motion.js','./v52-expenses.js','./v52-expenses.css','./v52-stable.css','./v51-products.js','./v51-products.css','./v50-ui.css','./v50-selects.js','./v50-header.js','./v49-dashboard.js','./v49-tailwind.css','./v49-dashboard.css','./v48-desktop.js','./v48-desktop.css','./v47-thermal.js','./v47-thermal.css','./thermal-pos-preview.js','./thermal-core.js','./thermal-qr.js','./v46.js','./v46.css','./v45.js','./v45.css','./v44-pos.js','./v44-bridge-child.js','./pos-v44.html','./pos-original.html','./v39.css','./v38.js','./v38.css','./v37.js','./v37.css','./v36.js','./v36.css','./v35.js','./v35.css','./v34.js','./v34.css','./media.js','./media-config.js','./permissions.js','./auth.js','./sync.js','./sync-core.js','./oscar-activation-runtime.js','./admin.html','./v33.js','./v33.css','./fiscal.js','./v32.js','./v32.css','./shifts.js','./v31.js','./v31.css','./coa.js','./v30.js','./v30.css','./v29.js','./v29.css','./','./index.html','./style.css','./engine.js','./storage.js','./export.js','./app.js','./android.css','./android-shell.js','./android.js','./enhancements.css','./enhancements.js','./business.js','./native.js','./teal.js','./teal.css','./polish.css','./polish.js','./v17.js','./v18.js','./v18.css','./v19.js','./v19.css','./v20.css','./v20.js','./v21.css','./v21.js','./v22.js','./v23.js','./v24.js','./v28-ui.js','./v28-print.js','./v28-xlsx.js','./v28.css','./v27.js','./v27.css','./v26.js','./v26.css','./v25.js','./v25.css','./pricing.js','./v24.css','./v23.css','./v22.css','./native.css','./business.css','./import-core.js','./xlsx.full.min.js','./manifest.webmanifest','./cairo.ttf','./icon.svg','./icon-192.png','./icon-512.png'];
-self.addEventListener('install',e=>e.waitUntil(
- caches.open(CACHE).then(c=>c.addAll(FILES)).then(()=>self.skipWaiting())
-));
-self.addEventListener('activate',e=>e.waitUntil(
- caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('rawan-erp-static-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())
-));
-self.addEventListener('fetch',e=>{
- const req=e.request;
- if(req.method!=='GET')return;
- const parsed=new URL(req.url);
- // Remember Telegram photos *after the user has viewed them online*. They are
- // cross-origin opaque image responses, so res.ok alone cannot indicate success.
- if(parsed.pathname.includes("/tamam-customer/"))return;
- if(parsed.origin!==self.location.origin){
-  if(req.destination==='image'&&parsed.hostname==='api.telegram.org'&&parsed.pathname.startsWith('/file/bot')){
-   e.respondWith((async()=>{const c=await caches.open(MEDIA_CACHE),saved=await c.match(req);if(saved)return saved;
-    try{const res=await fetch(req);if(res.ok||res.type==='opaque')await c.put(req,res.clone());return res}catch{return Response.error()}
-   })());
+const BUILD = '7.9.4.198-r25-dashboard-animation';
+const CACHE = 'oscar-accounting-' + BUILD;
+const BASE = new URL('./', self.location.href);
+const LOCAL = ["./supplied-dashboard.css", "./card-theme.css", "./ct-google-translate.js", "./ct-google-translate.css", "./cash-top-header-logo.jpg", "./altamam-pro-logo.png", "./branches.css", "./accounting.js", "./accounting-windows10.css", "./accounting-icons.js", "./accounting-theme.css", "./accounting.css", "./accounting.html", "./admin.html", "./app-icon.png", "./app.css", "./windows10.css", "./windows10-dialogs.js", "./brand-logo.webp", "./customer-portal.js", "./customer.html", "./icon-192.png", "./icon-maskable-512.png", "./index.html", "./main.js", "./manifest.webmanifest", "./notification-badge.png", "./offline-fonts.css", "./oscar-activation-runtime.js", "./oscar-cloud-sync.js", "./oscar-ledger.html", "./p2p-bank-palestine.jpg", "./p2p-jawwal-pay.png", "./p2p-palpay.jpg", "./shared-17a3c04d5aba.jpg", "./shared-c50d51a1a3c0.jpg", "./support.html", "./trial-admin.html", "./trial-payment.html", "./معتمد.html"];
+const allowed = new Set(LOCAL.map(path => new URL(path, BASE).href));
+const indexURL = new URL('./index.html', BASE).href;
+const readyURL = new URL('./__offline_ready', BASE).href;
+self.addEventListener('install', event => event.waitUntil((async () => {
+  const cache = await caches.open(CACHE);
+  // Installation succeeds only after the entire local shell is stored.
+  // Keep the previous active worker/cache when any download fails.
+  await cache.delete(readyURL);
+  let next = 0;
+  async function download() {
+    while (next < LOCAL.length) {
+      const url = new URL(LOCAL[next++], BASE).href;
+      const response = await fetch(new Request(url, {cache:'reload'}));
+      if (!response.ok || new URL(response.url).origin !== BASE.origin) throw new Error('Incomplete offline shell: ' + url);
+      await cache.put(url, response);
+    }
   }
-  return;
- }
- e.respondWith((async()=>{
-  const cache=await caches.open(CACHE);
-  if(req.mode==='navigate'){
-   // Prefer a fresh HTML shell, but quickly use local cache when offline.
-   const ctrl=new AbortController(),timeout=setTimeout(()=>ctrl.abort(),1100);
-   try{const response=await fetch(req,{cache:'no-store',signal:ctrl.signal});clearTimeout(timeout);if(response.ok)await cache.put(req,response.clone());return response}
-   catch{clearTimeout(timeout);return (await cache.match(req))||(new URL(req.url).pathname.endsWith('/admin.html')?undefined:await cache.match('./index.html'))||Response.error()}
-  }
-  const cached=await cache.match(req);
-  if(cached)return cached;
-  try{const res=await fetch(req);if(res.ok)await cache.put(req,res.clone());return res}
-  catch{return Response.error()}
- })());
+  await Promise.all(Array.from({length:6}, download));
+  await cache.put(readyURL, new Response(BUILD));
+  await self.skipWaiting();
+})()));
+self.addEventListener('activate', event => event.waitUntil(self.clients.claim()));
+self.addEventListener('fetch', event => {
+  const req = event.request;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  if (url.origin !== BASE.origin || !url.pathname.startsWith(BASE.pathname)) return;
+  // Only bundled static files enter Cache Storage; API/auth/financial requests don't.
+  url.search = ''; url.hash = '';
+  if (url.href === BASE.href) url.href = indexURL;
+  if (!allowed.has(url.href)) return;
+  event.respondWith((async () => {
+    const cache = await caches.open(CACHE);
+    const hit = await cache.match(url.href);
+    if (hit) return hit;
+    const response = await fetch(req);
+    if (response.ok && !response.redirected) await cache.put(url.href, response.clone());
+    return response;
+  })());
 });
+self.addEventListener('message', event => {
+  if (event.data === 'SKIP_WAITING') event.waitUntil(self.skipWaiting());
+  if (event.data?.type === 'CT_OFFLINE_STATUS') event.waitUntil((async () => {
+    const cache = await caches.open(CACHE);
+    const complete = !!(await cache.match(readyURL));
+    event.ports[0]?.postMessage({ready:complete, build:BUILD});
+  })());
+});
+
+// Persistent Web Push settings survive service worker upgrades.
+const CT_NOTIFY_CACHE='ct-notifications-config-v1';
+async function ctNotificationConfig(value){const cache=await caches.open(CT_NOTIFY_CACHE),key=new URL('./__notification_config',self.registration.scope);if(value){await cache.put(key,new Response(JSON.stringify(value)));return value;}try{return await (await cache.match(key)).json();}catch{return null;}}
+let ctNotificationSerial=Promise.resolve();
+function ctNotifyOrdered(fn){const job=ctNotificationSerial.then(fn);ctNotificationSerial=job.catch(()=>{});return job;}
+async function ctShowNotification(d){
+ if(!d)return;const cfg=await ctNotificationConfig();if(!cfg?.enabled||cfg.tenant!==d.tenant||cfg.types[d.type]===false||!Number.isFinite(d.createdAt)||d.createdAt<Number(cfg.since||Infinity))return;
+ const cache=await caches.open('ct-notifications-seen-v1');const key=new URL('./__notification_seen/'+encodeURIComponent(d.tenant)+':'+encodeURIComponent(d.id),self.registration.scope);
+ if(await cache.match(key))return;
+ await self.registration.showNotification(String(d.title||'كاش توب 3').slice(0,120),{body:String(d.body||'').slice(0,500),icon:new URL('./icon-192.png',self.registration.scope).href,badge:new URL('./notification-badge.png',self.registration.scope).href,lang:'ar',dir:'rtl',tag:String(d.id||'ct-notification'),data:{tab:d.tab,tenant:d.tenant,recordId:d.recordId,storeName:d.storeName}});
+ await cache.put(key,new Response(String(Date.now())));const keys=await cache.keys();for(const old of keys.slice(0,Math.max(0,keys.length-2000)))await cache.delete(old);
+}
+self.addEventListener('message',event=>{if(event.data?.type==='CT_NOTIFICATION_CONFIG')event.waitUntil(ctNotifyOrdered(()=>ctNotificationConfig({tenant:event.data.tenant,enabled:!!event.data.enabled,types:event.data.types||{},since:Number(event.data.since)||Date.now()})));else if(event.data?.type==='CT_SHOW_NOTIFICATION')event.waitUntil(ctNotifyOrdered(()=>ctShowNotification(event.data.notification)));});
+self.addEventListener('push',event=>{let d;try{d=event.data?.json();}catch{return;}event.waitUntil(ctNotifyOrdered(()=>ctShowNotification(d)));});
+self.addEventListener('notificationclick',event=>{event.notification.close();event.waitUntil((async()=>{const d=event.notification.data||{},list=await clients.matchAll({type:'window',includeUncontrolled:true});const scope=new URL(self.registration.scope);for(const client of list){if(client.url.startsWith(scope.href)){await client.focus();client.postMessage({type:'CT_NOTIFICATION_OPEN',tab:d.tab,tenant:d.tenant,recordId:d.recordId,storeName:d.storeName});return;}}const url=new URL('./index.html',scope);url.searchParams.set('notificationTab',String(d.tab||'settings'));url.searchParams.set('notificationTenant',String(d.tenant||''));if(d.recordId)url.searchParams.set('notificationRecord',String(d.recordId));if(d.storeName)url.searchParams.set('notificationStore',String(d.storeName));await clients.openWindow(url.href);})());});

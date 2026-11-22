@@ -1,0 +1,613 @@
+/* Screen theme. Printing and the desktop window layout retain their own rules. */
+@layer cash-top-cards, cash-top-win10;
+
+@layer cash-top-cards {
+  @media screen {
+    html.theme-win10 {
+      --win-font: Cairo, "Segoe UI", Tahoma, sans-serif !important;
+      --card-canvas: #eef3f0;
+      --card-line: #d3e1db;
+      --card-shadow: 0 5px 15px rgb(28 66 52 / 8%);
+      --card-green: linear-gradient(125deg, #197253, #115465);
+      --card-blue: linear-gradient(135deg, #2871b6, #234e91);
+      --card-amber: linear-gradient(135deg, #a96b0d, #895014);
+      --card-plum: linear-gradient(135deg, #7758a4, #58377d);
+      --card-berry: linear-gradient(135deg, #b93470, #8f2357);
+      --card-teal: linear-gradient(135deg, #237c80, #145366);
+      --win-desktop: var(--card-green) !important;
+      --win-window: var(--card-canvas) !important;
+      --win-hover: #edf6f1 !important;
+      --win-active: #d6eddf !important;
+      --win-border: #adc2b9 !important;
+      --win-divider: var(--card-line) !important;
+      --win-text: #1a2c26 !important;
+      --win-muted: #566a62 !important;
+      --win-accent: #126454 !important;
+      --win-accent-hover: #14574d !important;
+      --win-accent-active: #12483e !important;
+      --win-menu-shadow: 0 10px 30px rgb(23 57 45 / 16%) !important;
+      --win-window-shadow: 0 20px 55px rgb(16 55 43 / 24%) !important;
+      --color-violet-50: #eef8f3 !important;
+      --color-violet-100: #dff2e8 !important;
+      --color-violet-200: #c1e4d5 !important;
+      --color-violet-300: #9dcfbf !important;
+      --color-violet-400: #75ae9b !important;
+      --color-violet-500: #357c6b !important;
+      --color-violet-600: #126454 !important;
+      --color-violet-700: #14574d !important;
+      --color-violet-800: #12483e !important;
+      --color-violet-900: #103a34 !important;
+      --color-violet-950: #0a2620 !important;
+    }
+
+    .theme-win10 :is(.card, .panel, .balance-card, .summary-card, .support-card, .osd-kpi,
+      .osd-action, .oscar-product-card, .ct-checkout-rail, .ct-products-cart, .ct-invoice-card,
+      .dist-card, .dist-panel, .dist-table-wrap, #products-table-container, #customers-table-card,
+      .ct-products-search-row, .ct-product-info, .customer-detail-panel, .auth2-card, .auth2-dropzone) {
+      border-radius: 18px !important;
+      border-color: var(--card-line) !important;
+      box-shadow: var(--card-shadow) !important;
+    }
+
+    .theme-win10 :is(button, .btn, .pay-btn, input[type="submit"]) {
+      border-radius: 10px !important;
+    }
+    .theme-win10 :is(input:not([type]), input[type="text"], input[type="search"], input[type="number"],
+      input[type="email"], input[type="password"], input[type="tel"], input[type="url"], input[type="date"],
+      input[type="time"], input[type="month"], input[type="week"], input[type="datetime-local"],
+      textarea, select, .searchable-dropdown-root > button, .auth2-select-trigger):not(.sr-only) {
+      border-radius: 11px !important;
+    }
+    .theme-win10 :is(input, textarea, select):focus-visible:not([type="hidden"], [type="checkbox"], [type="radio"]) {
+      outline: 2px solid #286f5d !important;
+      outline-offset: 1px;
+    }
+    .theme-win10 :is(button, a[href]):focus-visible {
+      outline: 2px solid #1b6556 !important;
+      outline-offset: 2px !important;
+    }
+    .theme-win10 :is([data-ct-sell], .ct-apply-payment, .auth2-primary, .btn.primary,
+      button.primary, .pay-btn, .ct-pos-free-item-btn, button.bg-violet-600, input[type="submit"]):not(:disabled) {
+      background: var(--card-green) !important;
+      color: #fff !important;
+      border-color: #17624f !important;
+    }
+    .theme-win10 :is([data-ct-sell], .ct-apply-payment, .auth2-primary, .btn.primary,
+      button.primary, .pay-btn, .ct-pos-free-item-btn, button.bg-violet-600, input[type="submit"]):hover:not(:disabled) {
+      background: #14574d !important;
+    }
+
+    .theme-win10 :is(#main-header, body > .top, .win10-portal > header) {
+      background: #fafffc !important;
+      border-color: var(--card-line) !important;
+      box-shadow: 0 4px 16px rgb(21 65 48 / 8%) !important;
+    }
+    .theme-win10 #main-header :is(.ct-page-heading, .oscar-header-title) { font-weight: 850 !important; }
+    .theme-win10 #main-header .oscar-header-icon { color: #185646 !important; }
+    .theme-win10 #main-header :is(.ct-header-branch-link, .ct-nav-active, .ct-nav-group > [aria-expanded="true"]) {
+      color: #12483e !important;
+      background: #e1f1e8 !important;
+      border-color: #c4e2d3 !important;
+    }
+    .theme-win10 :is(.ct-nav-menu, .searchable-dropdown-panel, .auth2-select-menu, .cash-action-menu, .ct-language-panel, [role="menu"]) {
+      border-radius: 14px !important;
+      padding: 5px !important;
+    }
+    .theme-win10 .ct-theme-mobile-price { display: none; }
+    .theme-win10 :is(.ct-nav-menu > button, .cash-action-menu > button, .ct-language-panel > button, [role="option"]) {
+      border-radius: 8px !important;
+    }
+
+    .theme-win10 :is(.ct-win-window, .product-editor-modal-panel, .customer-editor-modal-panel,
+      .ct-payment-dialog, .expense-entry-modal, .ct-record-filter-dialog, .dist-modal) {
+      border-radius: 18px !important;
+      box-shadow: var(--win-window-shadow) !important;
+    }
+    .theme-win10 .ct-win-window[data-ct-win-state="maximized"] { border-radius: 0 !important; }
+    .theme-win10 :is(.product-editor-modal-panel, .customer-editor-modal-panel, .customer-detail-panel) {
+      background: #f7faf8 !important;
+    }
+    .theme-win10 :is(.product-editor-modal-panel, .customer-editor-modal-panel, .customer-detail-panel)
+      :is(.native-modal-topbar, .customer-editor-topbar, header) {
+      background: #e2f1ea !important;
+      color: #12483e !important;
+      border-color: #d0e6d9 !important;
+    }
+    .theme-win10 :is(.ct-desktop-taskbar, .ct-inventory-count-toolbar, .ct-mobile-sale-head) {
+      border-color: var(--card-line) !important;
+    }
+    .theme-win10 .ct-mobile-sale-head {
+      background: var(--card-green) !important;
+      color: #fff !important;
+    }
+    .theme-win10 .osd-segment {
+      background: #f1f7f4 !important;
+      color: #285044 !important;
+    }
+    .theme-win10 .osd-segment.active {
+      background: #126454 !important;
+      color: #fff !important;
+    }
+
+    .theme-win10 .ct-sales-highlight {
+      background: var(--card-green) !important;
+      border-color: #17624f !important;
+      color: #fff !important;
+    }
+    .theme-win10 .ct-sales-highlight :is(h2, .osd-kpi-value, .osd-kpi-value small, .osd-kpi-bottom) {
+      color: #fff !important;
+    }
+    .theme-win10 .ct-sales-highlight :is(.osd-icon-tile, .osd-trend) {
+      background: #ffffff24 !important;
+      color: #fff !important;
+      border-radius: 12px !important;
+    }
+    .theme-win10 .osd-kpi:not(.ct-sales-highlight) .osd-icon-tile {
+      border-radius: 12px !important;
+      background: #dcefeb !important;
+      color: #1a6153 !important;
+    }
+    .theme-win10 .osd-kpi-grid .osd-kpi:nth-child(2) { background: #fff4df !important; border-color: #eed3a0 !important; }
+    .theme-win10 .osd-kpi-grid .osd-kpi.debt { background: #faeaf1 !important; border-color: #ebc3d7 !important; }
+    .theme-win10 .osd-kpi-grid .osd-kpi.stock { background: #e7f0fb !important; border-color: #c4d8f0 !important; }
+    .theme-win10 .osd-kpi-grid .ct-r11-kpi:nth-child(3n) { background: #e3f2ed !important; }
+    .theme-win10 .osd-kpi-grid .ct-r11-kpi:nth-child(3n + 1) { background: #f4edfb !important; }
+    .theme-win10 .osd-insight { background: var(--card-teal) !important; border-color: transparent !important; color: #fff !important; }
+    .theme-win10 .osd-insight :is(p, .osd-insight-top, .osd-insight-foot, .osd-insight-foot strong) { color: #fff !important; }
+
+    .theme-win10 :is(.ct-mobile-overview, .ct-pos-mobile-warehouse) { display: none; }
+    .theme-win10 [data-section] {
+      --tile-fill: var(--card-green);
+      --tile-border: #bfded1;
+    }
+    .theme-win10 [data-section]:is([data-section="sales"], [data-section="purchases"], [data-section="branches"], [data-section="products"], [data-section="employees"]) {
+      --tile-fill: var(--card-blue);
+      --tile-border: #bbd1e8;
+    }
+    .theme-win10 [data-section]:is([data-section="inventory"], [data-section="accounts"], [data-section="barcodes"]) {
+      --tile-fill: var(--card-amber);
+      --tile-border: #ebd2a8;
+    }
+    .theme-win10 [data-section]:is([data-section="more"], [data-section="categories"], [data-section="accounting"], [data-section="financial_years"], [data-section="restaurant_tables"], [data-section="settings"]) {
+      --tile-fill: var(--card-plum);
+      --tile-border: #d9c9e9;
+    }
+    .theme-win10 [data-section]:is([data-section="customers"], [data-section="expenses"], [data-section="price_groups"], [data-section="trash"]) {
+      --tile-fill: var(--card-berry);
+      --tile-border: #ecc2d5;
+    }
+    .theme-win10 [data-section]:is([data-section="suppliers"], [data-section="distribution"], [data-section="vouchers"], [data-section="message_templates"]) {
+      --tile-fill: var(--card-teal);
+      --tile-border: #b5dce0;
+    }
+    .theme-win10 button.osd-action {
+      background: #fff !important;
+      color: var(--win-text) !important;
+      border-color: var(--tile-border) !important;
+      border-radius: 16px !important;
+    }
+    .theme-win10 .osd-action-icon {
+      background: var(--tile-fill) !important;
+      color: #fff !important;
+      border-radius: 12px !important;
+    }
+    .theme-win10 .osd-action-icon svg { color: inherit !important; }
+    .theme-win10 .osd-action:is(:hover, :focus-visible) { background: var(--win-hover) !important; }
+    .theme-win10 .ct-customer-summary > div {
+      border-radius: 13px !important;
+      background: #e7f2ef !important;
+      border-color: #cbe3d9 !important;
+    }
+    .theme-win10 .ct-customer-summary > div:first-child {
+      background: var(--card-green) !important;
+      color: #fff !important;
+      border-color: transparent !important;
+    }
+    .theme-win10 .ct-customer-summary[data-balance="due"] > div:first-child {
+      background: var(--card-berry) !important;
+    }
+    .theme-win10 .ct-customer-summary > div:first-child :is(span, strong) { color: #fff !important; }
+
+    html.theme-win10.ct-win-accounting,
+    .theme-win10.ct-win-accounting .win10-accounting-body { background: var(--card-canvas) !important; }
+    .theme-win10.ct-win-accounting .win10-accounting-body { font-family: var(--win-font) !important; }
+    .theme-win10.ct-win-accounting .win10-accounting-body :is(button, input, select, textarea, .rounded-md, .rounded-lg, .rounded-xl, .rounded-2xl) {
+      border-radius: 12px !important;
+    }
+    .theme-win10 .win10-accounting-body :is(button.bg-indigo-600, button.bg-indigo-700):not(:disabled) {
+      background: var(--card-green) !important;
+    }
+  }
+
+  @media screen and (min-width: 1024px) {
+    .theme-win10 #main-header .ct-nav-group > button {
+      border-radius: 9px !important;
+      font-weight: 700 !important;
+    }
+    .theme-win10 #ct-pos-workspace .ct-catalog-thumb { border-radius: 7px !important; }
+    .theme-win10 #ct-pos-workspace .oscar-product-card { border-radius: 11px !important; }
+  }
+
+  @media screen and (max-width: 1023px) {
+    .theme-win10 #mobile-bottom-nav.cash-bottom-nav {
+      background: #fafffc !important;
+      border-color: var(--card-line) !important;
+      box-shadow: 0 -6px 24px rgb(33 77 59 / 9%) !important;
+      gap: 4px;
+      padding-inline: 8px;
+    }
+    .theme-win10 .cash-bottom-item {
+      color: #425751 !important;
+      font-size: 11px;
+      border-radius: 13px !important;
+      gap: 3px;
+    }
+    .theme-win10 .cash-bottom-item.active {
+      background: var(--tile-fill) !important;
+      color: #fff !important;
+    }
+    .theme-win10 .cash-bottom-center { margin-block-start: -23px; }
+    .theme-win10 .cash-bottom-center .cash-bottom-center-icon {
+      background: var(--card-green) !important;
+      color: #fff !important;
+      border-radius: 50% !important;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 2px;
+      width: 62px;
+      height: 62px;
+      max-width: 100%;
+      flex-shrink: 0;
+      box-shadow: 0 0 0 4px #e1efe8, 0 8px 18px #14574d40 !important;
+      font-size: 11px;
+    }
+
+    .theme-win10 #ct-mobile-sidebar-overlay > .mobile-sidebar-panel {
+      inset: 0 !important;
+      width: 100% !important;
+      max-width: none !important;
+      background: var(--card-canvas) !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      text-align: start;
+      animation: ct-card-page-in .18s ease-out;
+    }
+    .theme-win10 #main-header { display: none !important; }
+    html.theme-win10 {
+      --oscar-modal-header-edge: env(safe-area-inset-top, 0px);
+    }
+    .theme-win10 .ct-drawer-toolbar {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      padding: max(6px, env(safe-area-inset-top)) clamp(12px, 4vw, 24px) 6px;
+    }
+    .theme-win10 .ct-drawer-toolbar button {
+      position: static;
+      display: grid;
+      place-items: center;
+      min-width: 36px;
+      height: 36px;
+      background: #fff !important;
+      color: #165447 !important;
+      border: 1px solid var(--card-line) !important;
+      border-radius: 10px !important;
+    }
+    .theme-win10 .ct-drawer-brand { margin: 0 clamp(12px, 4vw, 24px) 8px; }
+    .theme-win10 .ct-drawer-brand > div {
+      background: var(--card-green) !important;
+      padding: 12px !important;
+      border: 0;
+      border-radius: 18px !important;
+      box-shadow: 0 8px 18px rgb(19 83 68 / 18%) !important;
+    }
+    .theme-win10 .ct-drawer-brand button { text-align: start; }
+    .theme-win10 .ct-drawer-brand :is(.text-slate-900, .text-violet-600) { color: #fff !important; }
+    .theme-win10 .ct-drawer-brand .text-slate-900 { font-size: 16px; }
+    .theme-win10 .ct-drawer-brand img { border-radius: 12px !important; }
+    .theme-win10 .ct-drawer-nav {
+      padding: 3px clamp(12px, 4vw, 24px) 18px !important;
+      display: grid;
+      align-content: start;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 9px;
+    }
+    .theme-win10 .ct-drawer-nav .ct-drawer-item {
+      position: relative;
+      min-width: 0;
+      min-height: 92px;
+      margin: 0;
+      padding: 9px 4px !important;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px !important;
+      text-align: center !important;
+      font-size: 11px !important;
+      line-height: 1.45;
+      color: var(--win-text) !important;
+      border: 1px solid var(--tile-border) !important;
+      border-radius: 15px !important;
+      background: #fff !important;
+      box-shadow: var(--card-shadow) !important;
+    }
+    .theme-win10 .ct-drawer-nav .ct-drawer-item.is-active {
+      background: #e6f4ec !important;
+      border-color: #478c72 !important;
+    }
+    .theme-win10 .ct-drawer-label {
+      display: block;
+      width: 100%;
+      flex: 0;
+      text-align: center !important;
+      overflow-wrap: anywhere;
+    }
+    .theme-win10 .ct-drawer-nav .ct-drawer-icon {
+      width: 40px !important;
+      height: 38px !important;
+      background: var(--tile-fill) !important;
+      color: #fff !important;
+      border-radius: 11px !important;
+    }
+    .theme-win10 .ct-drawer-nav .ct-drawer-icon svg { width: 22px !important; height: 22px !important; color: inherit !important; }
+    .theme-win10 .ct-drawer-item b {
+      position: absolute;
+      inset-block-start: 5px;
+      inset-inline-end: 4px;
+      background: #e6f2ed;
+      color: #245547;
+      padding: 1px 4px;
+      max-width: 42%;
+      overflow-wrap: anywhere;
+    }
+    .theme-win10 .ct-drawer-logout {
+      min-height: 42px;
+      margin: 5px clamp(12px, 4vw, 24px) max(8px, env(safe-area-inset-bottom));
+      background: #fbeef0;
+      border: 1px solid #ead0d5;
+    }
+
+    .theme-win10 .osd-root {
+      direction: inherit;
+      padding: 0 14px 22px;
+    }
+    .theme-win10 .ct-pos-mobile-warehouse {
+      display: block;
+      flex: 0 0 auto;
+      padding: max(8px, env(safe-area-inset-top)) 12px 5px;
+      background: var(--win-window);
+    }
+    .theme-win10 .ct-pos-mobile-warehouse .searchable-dropdown-root { max-width: 220px; }
+    .theme-win10 .ct-mobile-overview {
+      display: block;
+      margin-bottom: 22px;
+    }
+    .theme-win10 .ct-home-hero {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      margin-inline: -14px;
+      padding: max(17px, env(safe-area-inset-top)) 14px 24px;
+      border-radius: 0 0 29px 29px;
+      background: linear-gradient(120deg, #107650, #075365);
+      color: #fff;
+    }
+    .theme-win10 .ct-home-hero::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      width: 240px;
+      height: 240px;
+      inset-block-start: -135px;
+      inset-inline-end: -45px;
+      border-radius: 50%;
+      background: rgb(255 255 255 / 9%);
+    }
+    .theme-win10 .ct-home-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .theme-win10 .ct-home-top > div:first-child { min-width: 0; }
+    .theme-win10 .ct-home-top h1 {
+      margin: 3px 0;
+      overflow-wrap: anywhere;
+      font-size: clamp(21px, 6.1vw, 34px);
+      line-height: 1.4;
+      font-weight: 900;
+    }
+    .theme-win10 :is(.ct-home-top p, .ct-home-top time, .ct-home-sales p, .ct-home-hero-stats span) {
+      color: #e7f6f1;
+      font-size: 12px;
+    }
+    .theme-win10 .ct-home-tools { display: grid; align-content: start; justify-items: end; gap: 5px; }
+    .theme-win10 .ct-home-tools button {
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 9px;
+      border-radius: 100px !important;
+      background: #ffffff23;
+      color: white;
+      font-size: 10px;
+      font-weight: 800;
+    }
+    .theme-win10 .ct-home-tools button:focus-visible,
+    .theme-win10 .ct-home-hero-stats button:focus-visible { outline-color: #fff !important; }
+    .theme-win10 .ct-home-sales { margin: 24px 0 17px; }
+    .theme-win10 .ct-home-sales strong {
+      display: block;
+      font-size: clamp(33px, 10.2vw, 61px);
+      line-height: 1.2;
+      margin-block-start: 4px;
+      font-weight: 900;
+      text-align: end;
+      overflow-wrap: anywhere;
+    }
+    html.theme-win10[dir="ltr"] .ct-home-sales strong { text-align: start; }
+    .theme-win10 .ct-home-hero-stats {
+      display: grid;
+      grid-auto-columns: minmax(0, 1fr);
+      grid-auto-flow: column;
+      gap: 7px;
+    }
+    .theme-win10 .ct-home-hero-stats > * {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 3px;
+      padding: 8px 9px;
+      border-radius: 13px !important;
+      background: #ffffff28;
+      text-align: start;
+      color: #fff;
+    }
+    .theme-win10 .ct-home-hero-stats strong { font-size: clamp(12px, 3.8vw, 22px); overflow-wrap: anywhere; }
+    .theme-win10 :is(.ct-home-balances, .ct-home-quick-grid) {
+      display: grid;
+      gap: 9px;
+      margin-block-start: 13px;
+    }
+    .theme-win10 .ct-home-balances { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .theme-win10 .ct-home-balances:empty, .theme-win10 .ct-home-quick-grid:empty { display: none; }
+    .theme-win10 .ct-home-balance {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 5px;
+      min-height: 67px;
+      padding: 8px 10px;
+      border: 1px solid;
+      border-radius: 15px !important;
+      box-shadow: var(--card-shadow);
+      text-align: start;
+      color: #1a2c26;
+    }
+    .theme-win10 .ct-home-balance > span { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 800; }
+    .theme-win10 .ct-home-balance > strong { font-size: clamp(15px, 4.7vw, 24px); overflow-wrap: anywhere; }
+    .theme-win10 .ct-home-cash {
+      grid-column: 1 / -1;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 53px;
+      background: #fff0d7;
+      border-color: #eecb88;
+    }
+    .theme-win10 .ct-home-receivable { background: #e5f5ed; border-color: #b9ddce; }
+    .theme-win10 .ct-home-payable { background: #fce5ee; border-color: #efbbd1; }
+    .theme-win10 .ct-home-quick-grid { grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 7px; }
+    .theme-win10 button.ct-home-quick {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-height: 93px;
+      min-width: 0;
+      padding: 7px 3px;
+      border-radius: 16px !important;
+      background: var(--tile-fill);
+      color: #fff;
+      box-shadow: var(--card-shadow);
+      font-size: clamp(10px, 3vw, 15px);
+      font-weight: 900;
+      text-align: center;
+      overflow-wrap: anywhere;
+    }
+    .theme-win10 .ct-home-quick[data-section="inventory"] {
+      --tile-fill: linear-gradient(135deg, #b46905, #a05a00);
+    }
+    .theme-win10 .ct-home-quick[data-section="purchases"] {
+      --tile-fill: linear-gradient(135deg, #2477c8, #15488a);
+    }
+    .theme-win10 .ct-home-quick[data-section="customers"] {
+      --tile-fill: linear-gradient(135deg, #d22671, #a40d55);
+    }
+
+    .theme-win10 .osd-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .theme-win10 .ct-sales-highlight { grid-column: 1 / -1; padding: 18px !important; }
+    .theme-win10 .ct-sales-highlight .osd-kpi-value { font-size: clamp(28px, 9vw, 46px); }
+    .theme-win10 .osd-overview { margin-block: 15px; }
+    .theme-win10 .osd-action {
+      min-height: 84px;
+      align-items: center;
+    }
+    .theme-win10 .osd-action > div:nth-child(2) { min-width: 0; overflow-wrap: anywhere; }
+    .theme-win10 .osd-kpi-value {
+      flex-wrap: wrap;
+      min-width: 0;
+      overflow-wrap: anywhere;
+      white-space: normal;
+    }
+    .theme-win10 :is(.product-editor-modal-panel, .customer-editor-modal-panel) :is(input, select, textarea) { font-size: 16px; }
+    .theme-win10 .ct-customer-summary > div:first-child { grid-column: 1 / -1; }
+    .theme-win10 .ct-customer-summary > div:first-child strong { font-size: 28px !important; }
+  }
+
+  @media screen and (max-width: 767px) {
+    .theme-win10 :is(#products-table-container, #customers-table-card) :is(tr, td) { border-color: #e4ece7 !important; }
+    .theme-win10 #products-table-container tbody tr {
+      padding-inline: 12px 42px;
+      column-gap: 7px;
+      min-height: 72px;
+    }
+    .theme-win10 #products-table-container td:nth-child(4) { display: none !important; }
+    .theme-win10 #products-table-container td:nth-child(6) {
+      grid-row: 1 / 3;
+      grid-column: 2;
+      text-align: center !important;
+    }
+    .theme-win10 #products-table-container td:nth-child(7) {
+      inset-inline: auto 7px;
+    }
+    .theme-win10 #products-table-container td:nth-child(6) > span {
+      color: #245547 !important;
+      background: #eaf4ed !important;
+      border-radius: 9px !important;
+      padding: 3px 6px;
+      display: inline-block;
+      max-width: 94px;
+    }
+    .theme-win10 #products-table-container td:nth-child(6) > span.bg-amber-100 {
+      color: #744b16 !important;
+      background: #fcf0d8 !important;
+    }
+    .theme-win10 #products-table-container .ct-theme-mobile-price {
+      display: block !important;
+      color: #3d5c50;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .theme-win10 #products-table-container .ct-product-list-code { display: none; }
+    .theme-win10 .ct-products-search-row {
+      gap: 8px;
+      padding: 9px;
+    }
+    .theme-win10 .ct-products-search-row > div:first-child { flex-basis: 100%; min-width: 0; }
+    .theme-win10 .ct-products-search-row input { min-height: 42px; font-size: 16px; }
+  }
+
+  @media screen and (max-width: 350px) {
+    .theme-win10 .ct-drawer-nav { gap: 7px; }
+    .theme-win10 .cash-bottom-center .cash-bottom-center-icon { width: 52px; height: 52px; }
+    .theme-win10 .cash-bottom-item { font-size: 10px; }
+  }
+
+  @keyframes ct-card-page-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .theme-win10 #ct-mobile-sidebar-overlay > .mobile-sidebar-panel { animation: none; }
+  }
+}
