@@ -258,7 +258,7 @@ async function pushDistributionBatch(s,op){
  FROM json_each(NEW.payload,'$.operations') o WHERE 1
  ON CONFLICT(path) DO UPDATE SET payload=excluded.payload,deleted=0,updated_at=MAX(excluded.updated_at,${s.table}.updated_at+1),sync_batch=excluded.sync_batch;
  END`,args:[]}]);
- const operations=(op.value?.operations||[]).map(x=>{const field=x.storeName==='stock'?'baseQuantity':['accounts','customers'].includes(x.storeName)?'balance':null;return {path:pathFor(x.storeName,keyString(x.storeName,x.value)),mode:field?(field==='baseQuantity'?'stock':'balance'):'replace',delta:field?(Number(x.value?.[field]||0)-Number(x.before?.[field]||0)):0,expectedAt:x.before?.updatedAt||'',allowNegative:!!x.allowNegative,envelope:JSON.stringify({v:x.value,rev:op.rev,deviceId:op.deviceId,tenantId:tenant()}),rev:op.rev}});
+ const operations=(op.value?.operations||[]).map(x=>{const field=x.storeName==='stock'?'baseQuantity':['accounts','customers','suppliers'].includes(x.storeName)?'balance':null;return {path:pathFor(x.storeName,keyString(x.storeName,x.value)),mode:field?(field==='baseQuantity'?'stock':'balance'):'replace',delta:field?(Number(x.value?.[field]||0)-Number(x.before?.[field]||0)):0,expectedAt:x.before?.updatedAt||'',allowNegative:!!x.allowNegative,envelope:JSON.stringify({v:x.value,rev:op.rev,deviceId:op.deviceId,tenantId:tenant()}),rev:op.rev}});
  const checks=(op.value?.checks||[]).map(x=>({path:pathFor(x.storeName,keyString(x.storeName,x.before,x.key)),status:x.before?.status||''}));
  await s.d.pipeline(s.c,[{sql:`INSERT INTO ${bt}(id,tenant,payload,created_at) VALUES(?,?,?,?) ON CONFLICT(id) DO NOTHING`,args:[tenant()+':'+op.key,tenant(),JSON.stringify({operations,checks}),Date.now()]}],60000);
 }

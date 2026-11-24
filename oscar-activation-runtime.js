@@ -265,12 +265,12 @@
   authToken: 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3OTA3NTI5MTUsImlkIjoiMDFhMGYxMzAtZTYwMS03NGExLThkOTktMDJkMWUwZjYxODQ4Iiwia2lkIjoiMGZxOHFxN2dNaDhyMGRXNEtuaWRuRzFrZDdUNFBrMXZkZDAxaGZNOVNtUSIsInJpZCI6IjQ0NWFmNzdiLTEwM2ItNGNkNC1hYTNmLWIxNTI3ZDUwZjcxYiJ9.gpLweb2Pwv6dpt7eYhVJOQpiOcf7eqszxDZSoD1N1RjDzrtPEIEJjh6xvveMOcrolHJMRRZ7_8TAGF8zthvQAg',
   table: 'oscar_rtdb',
 };
-  function normalizeAppUrl(value){const url=new URL(safe(value)||'https://www.cashtoop.com/');if(url.protocol!=='https:'&&!(url.protocol==='http:'&&['localhost','127.0.0.1'].includes(url.hostname)))throw Error('أدخل رابط HTTPS صالحاً للتطبيق.');url.search='';url.hash='';return url.href;}
+  function normalizeAppUrl(value){const url=new URL(safe(value)||'./',location.href);if(url.protocol!=='https:'&&!(url.protocol==='http:'&&['localhost','127.0.0.1'].includes(url.hostname)))throw Error('أدخل رابط HTTPS صالحاً للتطبيق.');url.search='';url.hash='';return url.href;}
   async function copyText(text){try{await navigator.clipboard.writeText(text);}catch{const field=document.createElement('textarea');field.value=text;field.style.cssText='position:fixed;top:0;opacity:0';document.body.appendChild(field);field.select();const ok=document.execCommand('copy');field.remove();if(!ok)throw Error('تعذر نسخ الرابط.');}return text;}
   async function loginLinkId(secret){return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',enc.encode(secret))),n=>n.toString(16).padStart(2,'0')).join('');}
   async function createActivationLink(payload,baseUrl,{copy=true}={}){
     const made=await makeFile(payload);
-    const url=new URL(normalizeAppUrl(baseUrl||payload.appBaseUrl||readRuntime()?.appBaseUrl));url.hash='code='+encodeURIComponent(made.opaque);
+    const url=new URL(normalizeAppUrl(baseUrl||new URL("./",location.href).href));url.hash='code='+encodeURIComponent(made.opaque);
     if(copy)await copyText(url.href);return url.href;
   }
   async function resolveActivationLink(secret){

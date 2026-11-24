@@ -1,4 +1,4 @@
-const BUILD = '7.9.4.198-r25-dashboard-animation';
+const BUILD = '7.9.4.199-r26-altamam';
 const CACHE = 'oscar-accounting-' + BUILD;
 const BASE = new URL('./', self.location.href);
 const LOCAL = ["./supplied-dashboard.css", "./card-theme.css", "./ct-google-translate.js", "./ct-google-translate.css", "./cash-top-header-logo.jpg", "./altamam-pro-logo.png", "./branches.css", "./accounting.js", "./accounting-windows10.css", "./accounting-icons.js", "./accounting-theme.css", "./accounting.css", "./accounting.html", "./admin.html", "./app-icon.png", "./app.css", "./windows10.css", "./windows10-dialogs.js", "./brand-logo.webp", "./customer-portal.js", "./customer.html", "./icon-192.png", "./icon-maskable-512.png", "./index.html", "./main.js", "./manifest.webmanifest", "./notification-badge.png", "./offline-fonts.css", "./oscar-activation-runtime.js", "./oscar-cloud-sync.js", "./oscar-ledger.html", "./p2p-bank-palestine.jpg", "./p2p-jawwal-pay.png", "./p2p-palpay.jpg", "./shared-17a3c04d5aba.jpg", "./shared-c50d51a1a3c0.jpg", "./support.html", "./trial-admin.html", "./trial-payment.html", "./معتمد.html"];

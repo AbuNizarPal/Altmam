@@ -36,15 +36,15 @@ const base=[
 ].map(([id,name,parentId,category,nature,isGroup])=>({id,code:id,name,parentId:parentId||null,category,nature,isGroup:!!isGroup,system:true}));
 function currentBranch(){try{return String(parent.__CT_ACTIVE_BRANCH__||'main')}catch{return'main'}}
 function normalizeBranch(record){const name=String(record?.branchId||'main');return ['main','الرئيسي','الفرع الرئيسي'].includes(name)?'main':name}
-function scopeAccounting(raw){
- const id=currentBranch(),whs=new Set((raw.warehouses||[]).filter(w=>normalizeBranch(w)===id).map(w=>w.id));
+function scopeAccounting(raw,id=currentBranch()){
+ const whs=new Set((raw.warehouses||[]).filter(w=>normalizeBranch(w)===id).map(w=>w.id));
  const stockedProducts=new Set((raw.stock||[]).filter(s=>whs.has(s.warehouseId)).map(s=>s.productId));
  const filter=(name)=>{raw[name]=(raw[name]||[]).filter(row=>normalizeBranch(row)===id)};
  for(const name of ['invoices','purchases','expenses','vouchers','accounts','customers','suppliers','accounting_journal','accounting_coa'])filter(name);
  raw.products=(raw.products||[]).filter(p=>normalizeBranch(p)===id||stockedProducts.has(p.id));
  return raw;
 }
-const S={db:null,raw:{},accounts:[],entries:[],balances:{},expanded:new Set(['1','11','1101','1102','1103','12','2','21','2101','22','3','31','4','41','5','51']),tab:'coa',warnings:[],loading:false};
+const S={db:null,raw:{},accounts:[],entries:[],balances:{},expanded:new Set(['1','11','1101','1102','1103','12','2','21','2101','22','3','31','4','41','5','51']),tab:'coa',ledgerAccount:null,companyEntries:[],warnings:[],loading:false};
 const nowDay=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
 const escapeHtml=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const cents=v=>{const n=Number(v);return Number.isFinite(n)?Math.round((n+Number.EPSILON)*100):0};
@@ -108,11 +108,12 @@ function buildAutomaticEntries(){
  const lines=[dr('1104',total-tax,'توريد بضاعة'),...(tax?[dr('1106',tax,'ضريبة مدخلات')]:[])];if(due)lines.push(cr(accountSupplier(p.supplierId),due,'مستحق للمورد'));lines.push(...distributePayments(p,paid,'credit'));
  push(makeEntry('purchases',p,'فاتورة مشتريات '+(p.invoiceNumber||''),lines,p.invoiceNumber))}
  for(const x of S.raw.expenses||[]){if(!isActive(x))continue;const amount=Math.abs(cents(x.amount));if(!amount)continue;
- push(makeEntry('expenses',x,'مصروف: '+(x.category||x.notes||'بدون تصنيف'),[dr(expenseCode(x.category),amount),cr(accountCash(x.accountId),amount)],'EXP-'+String(x.id||'').slice(-9)))}
+ push(makeEntry('expenses',x,'مصروف: '+(x.category||x.notes||'بدون تصنيف'),[dr((accountById(x.ledgerAccountId)?.category==='expense'?x.ledgerAccountId:expenseCode(x.category)),amount),cr(accountCash(x.accountId),amount)],'EXP-'+String(x.id||'').slice(-9)))}
  for(const v of S.raw.vouchers||[]){if(!isActive(v)||v.distributionManaged)continue;const amount=Math.abs(cents(v.amount));if(!amount)continue;
- const isReceipt=v.type==='receipt',cash=accountCash(v.accountId);let other='2104';if(v.partyType==='customer')other=accountCustomer(v.partyId);else if(v.partyType==='supplier')other=accountSupplier(v.partyId);
+ const isReceipt=v.type==='receipt',cash=accountCash(v.accountId);let other='2104';if(v.partyType==='customer')other=accountCustomer(v.partyId);else if(v.partyType==='supplier')other=accountSupplier(v.partyId);else if(v.partyType==='ledger'&&accountById(v.ledgerAccountId))other=v.ledgerAccountId;
  // Customer receipt: DR cash/CR receivable; supplier payment: DR payable/CR cash.
- const lines=isReceipt?[dr(cash,amount),cr(other,amount)]:[dr(other,amount),cr(cash,amount)];
+ const financial=v.payments?.length?distributePayments(v,amount,isReceipt?'debit':'credit'):[(isReceipt?dr:cr)(cash,amount)];
+ const lines=isReceipt?[...financial,cr(other,amount)]:[dr(other,amount),...financial];
  push(makeEntry('vouchers',v,(isReceipt?'سند قبض ':'سند صرف ')+(v.voucherNumber||'')+(v.partyName?' — '+v.partyName:''),lines,v.voucherNumber||('V-'+String(v.id).slice(-8))))}
  // Registered original opening balances only; never infer from changing current balances.
  // Manual journals are independent and never duplicated into operational source records.
@@ -132,7 +133,7 @@ function sortedChildren(parentId){return S.accounts.filter(a=>a.parentId===paren
 function setTab(tab){
  S.tab=tab;
  document.querySelectorAll('[data-tab]').forEach(b=>{const active=b.dataset.tab===tab;b.className='tab-btn flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm '+(active?'font-bold transition-all bg-white text-indigo-700 shadow-sm':'font-semibold text-slate-600 hover:text-slate-900 transition-all')});
- for(const id of ['coa','journal','balance','trial'])$('panel-'+id).hidden=id!==tab;
+ for(const id of ['coa','journal','balance','trial','income'])$('panel-'+id).hidden=id!==tab;
  document.body.classList.remove('print-balance','print-trial');render();
 }
 function render(){
@@ -149,7 +150,7 @@ function render(){
  $('balance-status').className='px-3.5 py-2 rounded-xl text-xs font-extrabold border flex items-center gap-1.5 '+(ok?'bg-emerald-50 text-emerald-700 border-emerald-200':'bg-rose-50 text-rose-700 border-rose-200');
  $('balance-status').innerHTML=ok?'<i class="fa-solid fa-check-circle"></i> الميزانية متوازنة (الأصول = الخصوم + حقوق الملكية)':'<i class="fa-solid fa-triangle-exclamation"></i> يوجد فرق غير متوازن: '+moneyC(Math.abs(f.diff));
  $('balance-total-assets').textContent=moneyC(f.assets);$('balance-total-right').textContent=moneyC(f.right);
- if(S.tab==='coa')renderCoa(f);if(S.tab==='journal')renderJournal(f);if(S.tab==='balance')renderBalance(f);if(S.tab==='trial')renderTrial(f);
+ if(S.tab==='coa')renderCoa(f);if(S.tab==='journal')renderJournal(f);if(S.tab==='balance')renderBalance(f);if(S.tab==='trial')renderTrial(f);if(S.tab==='income')renderIncome(f);
 }
 function renderCoa(f){
  const search=$('coa-search').value.trim().toLowerCase();let html='';
@@ -158,22 +159,115 @@ function renderCoa(f){
   const kids=sortedChildren(a.id),isOpen=S.expanded.has(a.id),bal=f.balances[a.id]||0,isRoot=!a.parentId&&!isSearch,isGroup=a.isGroup;
   const rowBg=isRoot?'bg-slate-50/90 font-extrabold':isGroup?'bg-white font-bold':'bg-white hover:bg-indigo-50/30';
   const countMov=S.entries.some(e=>e.lines.some(l=>l.accountId===a.id));
-  const canDelete=!a.system&&!a.dynamic&&!kids.length&&!countMov;
+  if($('hide-zero').checked&&bal===0&&!kids.some(child=>branchHasBalance(child.id,f.balances)))return;
+  const canDelete=!a.system&&!a.dynamic&&!kids.length&&!countMov&&bal===0;
   const cssNature=a.nature==='debit'?'bg-emerald-50 text-emerald-700':'bg-indigo-50 text-indigo-700';
-  html+=`<tr class="${rowBg} transition-colors group"><td class="py-3 px-4 tabular-nums"><span class="inline-block px-2 py-0.5 rounded-md text-xs font-extrabold ${isRoot?'bg-slate-800 text-white':'bg-slate-100 text-slate-700'}">${escapeHtml(a.code)}</span></td><td class="py-3 px-4"><div class="flex items-center gap-2" style="padding-right:${isSearch?0:Math.min(depth*22,176)}px">${!isSearch?(kids.length?`<button type="button" data-toggle="${escapeHtml(a.id)}" class="w-6 h-6 rounded-lg hover:bg-slate-200/70 text-slate-500 flex items-center justify-center transition"><i class="fa-solid ${isOpen?'fa-chevron-down':'fa-chevron-left'} text-xs"></i></button>`:'<span class="w-6 inline-flex justify-center text-slate-300"><i class="fa-solid fa-turn-up fa-rotate-270 text-xs"></i></span>'):''}<span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs ${isGroup?'bg-amber-50 text-amber-600':'bg-indigo-50 text-indigo-600'}"><i class="fa-solid ${isGroup?'fa-folder-open':'fa-file-lines'}"></i></span><div><span class="text-slate-800 ${isRoot?'text-base':'text-sm'}">${escapeHtml(a.name)}</span>${isRoot?`<span class="mr-2 text-xs px-2 py-0.5 rounded-full border ${badges[a.category]||badges.asset}">${CATEGORIES[a.category]||''}</span>`:''}</div></div></td><td class="py-3 px-4 text-center"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${cssNature}">${a.nature==='debit'?'مدين':'دائن'}</span></td><td class="py-3 px-4 text-center hidden md:table-cell"><span class="text-xs text-slate-500">${isGroup?'حساب رئيسي':'حساب فرعي'}</span></td><td class="py-3 px-4 text-left tabular-nums font-extrabold ${bal===0?'text-slate-400':((a.nature==='credit'?-bal:bal)<0?'text-rose-600':'text-slate-900')}">${moneyC(a.nature==='credit'?-bal:bal)}</td><td class="py-3 px-4 text-center no-print"><div class="inline-flex items-center justify-center gap-1">${isGroup?`<button type="button" data-addchild="${escapeHtml(a.id)}" title="إضافة حساب فرعي" class="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition text-xs font-bold flex items-center gap-1"><i class="fa-solid fa-plus-circle"></i><span class="hidden sm:inline">فرعي</span></button>`:`<button type="button" data-withaccount="${escapeHtml(a.id)}" title="إنشاء قيد على الحساب" class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition text-xs"><i class="fa-solid fa-pen-to-square"></i></button>`}${!a.system&&!a.dynamic?`<button type="button" data-editaccount="${escapeHtml(a.id)}" title="تعديل الحساب" class="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition text-xs"><i class="fa-solid fa-sliders"></i></button>`:''}${canDelete?`<button type="button" data-deleteaccount="${escapeHtml(a.id)}" title="حذف الحساب" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition text-xs"><i class="fa-solid fa-trash-can"></i></button>`:''}</div></td></tr>`;
+  html+=`<tr class="${rowBg} transition-colors group"><td class="py-3 px-4 tabular-nums"><span class="inline-block px-2 py-0.5 rounded-md text-xs font-extrabold ${isRoot?'bg-slate-800 text-white':'bg-slate-100 text-slate-700'}">${escapeHtml(a.code)}</span></td><td class="py-3 px-4"><div class="flex items-center gap-2" style="padding-right:${isSearch?0:Math.min(depth*22,176)}px">${!isSearch?(kids.length?`<button type="button" data-toggle="${escapeHtml(a.id)}" class="w-6 h-6 rounded-lg hover:bg-slate-200/70 text-slate-500 flex items-center justify-center transition"><i class="fa-solid ${isOpen?'fa-chevron-down':'fa-chevron-left'} text-xs"></i></button>`:'<span class="w-6 inline-flex justify-center text-slate-300"><i class="fa-solid fa-turn-up fa-rotate-270 text-xs"></i></span>'):''}<span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs ${isGroup?'bg-amber-50 text-amber-600':'bg-indigo-50 text-indigo-600'}"><i class="fa-solid ${isGroup?'fa-folder-open':'fa-file-lines'}"></i></span><div><span class="text-slate-800 ${isRoot?'text-base':'text-sm'}">${escapeHtml(a.name)}</span>${isRoot?`<span class="mr-2 text-xs px-2 py-0.5 rounded-full border ${badges[a.category]||badges.asset}">${CATEGORIES[a.category]||''}</span>`:''}</div></div></td><td class="py-3 px-4 text-center"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${cssNature}">${a.nature==='debit'?'مدين':'دائن'}</span></td><td class="py-3 px-4 text-center hidden md:table-cell"><span class="text-xs text-slate-500">${isGroup?'حساب رئيسي':'حساب فرعي'}</span></td><td class="py-3 px-4 text-left tabular-nums font-extrabold ${bal===0?'text-slate-400':((a.nature==='credit'?-bal:bal)<0?'text-rose-600':'text-slate-900')}"><button type="button" data-ledger="${escapeHtml(a.id)}" class="underline underline-offset-2" title="استعراض حركات الحساب">${moneyC(a.nature==='credit'?-bal:bal)}</button></td><td class="py-3 px-4 text-center no-print"><div class="inline-flex items-center justify-center gap-1">${isGroup?`<button type="button" data-addchild="${escapeHtml(a.id)}" title="إضافة حساب فرعي" class="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition text-xs font-bold flex items-center gap-1"><i class="fa-solid fa-plus-circle"></i><span class="hidden sm:inline">فرعي</span></button>`:`<button type="button" data-withaccount="${escapeHtml(a.id)}" title="إنشاء قيد على الحساب" class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition text-xs"><i class="fa-solid fa-pen-to-square"></i></button>`}${!a.system&&!a.dynamic?`<button type="button" data-editaccount="${escapeHtml(a.id)}" title="تعديل الحساب" class="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition text-xs"><i class="fa-solid fa-sliders"></i></button>`:''}${canDelete?`<button type="button" data-deleteaccount="${escapeHtml(a.id)}" title="حذف الحساب" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition text-xs"><i class="fa-solid fa-trash-can"></i></button>`:''}</div></td></tr>`;
   if(!isSearch&&isOpen)kids.forEach(ch=>row(ch,depth+1));
  };
  if(search){for(const a of S.accounts.filter(a=>a.name.toLowerCase().includes(search)||String(a.code).toLowerCase().includes(search)).sort((a,b)=>a.code.localeCompare(b.code,undefined,{numeric:true})))row(a,0,true)}else sortedChildren(null).forEach(a=>row(a,0));
  $('coa-body').innerHTML=html||'<tr><td colspan="6" class="py-10 text-center text-slate-400 text-sm">لا توجد حسابات مطابقة لعبارة البحث</td></tr>';
 }
+function branchHasBalance(id,balances){
+ return balances[id]!==0||sortedChildren(id).some(child=>branchHasBalance(child.id,balances));
+}
+function showLedger(id){
+ const account=accountById(id);
+ if(!account)return;
+ const ids=new Set();
+ const add=id=>{ids.add(id);sortedChildren(id).forEach(child=>add(child.id))};
+ add(id);
+ S.ledgerAccount={account,ids};
+ $('journal-search').value='';
+ $('origin-filter').value='all';
+ setTab('journal');
+}
 function renderJournal(f){
  const q=$('journal-search').value.trim().toLowerCase(),src=$('origin-filter').value;
- const entries=f.entries.filter(e=>(src==='all'||(src==='auto'&&!e.manual)||(src==='manual'&&e.manual))&&(!q||e.number.toLowerCase().includes(q)||e.description.toLowerCase().includes(q)||e.date.includes(q))).slice().reverse();
+ const entries=f.entries.filter(e=>(!S.ledgerAccount||e.lines.some(line=>S.ledgerAccount.ids.has(line.accountId)))&&(src==='all'||(src==='auto'&&!e.manual)||(src==='manual'&&e.manual))&&(!q||e.number.toLowerCase().includes(q)||e.description.toLowerCase().includes(q)||e.date.includes(q))).slice().reverse();
+ $('ledger-scope').hidden=!S.ledgerAccount;
+ $('ledger-scope-name').textContent=S.ledgerAccount?'حركات '+S.ledgerAccount.account.name:'';
  $('journal-body').innerHTML=entries.map(e=>{const value=e.lines.reduce((s,l)=>s+l.debit,0),reversed=!!e.reversalOf||e.description.includes('عكس القيد');
- const rows=e.lines.map(l=>{const acc=accountById(l.accountId);return `<tr class="border-t border-slate-100 hover:bg-slate-50/60"><td class="py-2 px-3 font-semibold text-slate-800">${escapeHtml((acc?.code||'')+' - '+(acc?.name||l.accountId))}</td><td class="py-2 px-3 text-slate-500 text-xs">${escapeHtml(l.note||'-')}</td><td class="py-2 px-3 text-left tabular-nums font-bold ${l.debit>0?'text-emerald-700':'text-slate-300'}">${moneyC(l.debit)}</td><td class="py-2 px-3 text-left tabular-nums font-bold ${l.credit>0?'text-indigo-700':'text-slate-300'}">${moneyC(l.credit)}</td></tr>`}).join('');
+ const rows=e.lines.filter(line=>!S.ledgerAccount||S.ledgerAccount.ids.has(line.accountId)).map(l=>{const acc=accountById(l.accountId);return `<tr class="border-t border-slate-100 hover:bg-slate-50/60"><td class="py-2 px-3 font-semibold text-slate-800">${escapeHtml((acc?.code||'')+' - '+(acc?.name||l.accountId))}</td><td class="py-2 px-3 text-slate-500 text-xs">${escapeHtml(l.note||'-')}</td><td class="py-2 px-3 text-left tabular-nums font-bold ${l.debit>0?'text-emerald-700':'text-slate-300'}">${moneyC(l.debit)}</td><td class="py-2 px-3 text-left tabular-nums font-bold ${l.credit>0?'text-indigo-700':'text-slate-300'}">${moneyC(l.credit)}</td></tr>`}).join('');
  const sourceLabel=e.manual?'قيد يدوي':'تلقائي من '+({'invoices':'المبيعات','cogs':'تكلفة المبيعات','returns':'المرتجعات','return-cost':'تكلفة المرتجعات','purchases':'المشتريات','vouchers':'السندات','expenses':'المصروفات'}[e.source]||e.source);
  return `<div class="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-sm"><div class="px-4 py-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2"><div class="flex items-center gap-3 flex-wrap"><span class="px-2.5 py-1 bg-indigo-600 text-white text-xs font-extrabold rounded-lg tabular-nums">${escapeHtml(e.number)}</span><span class="text-xs font-bold text-slate-500 tabular-nums"><i class="fa-regular fa-calendar ml-1"></i>${escapeHtml(e.date)}</span><span class="text-sm font-extrabold text-slate-800">${escapeHtml(e.description)}</span></div><div class="flex items-center gap-3"><span class="text-xs font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded-lg">${escapeHtml(sourceLabel)}</span><span class="text-xs font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 tabular-nums">إجمالي القيد: ${moneyC(value)}</span>${e.manual&&!reversed?`<button type="button" data-reverse="${escapeHtml(e.sourceRecordId)}" title="إنشاء قيد عكسي" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition text-xs no-print"><i class="fa-solid fa-rotate-left"></i></button>`:''}</div></div><div class="overflow-x-auto"><table class="w-full text-right text-xs"><thead><tr class="text-slate-400 bg-white"><th class="py-2 px-3 font-bold">الحساب</th><th class="py-2 px-3 font-bold">البيان التفصيلي</th><th class="py-2 px-3 w-32 text-left font-bold">مدين</th><th class="py-2 px-3 w-32 text-left font-bold">دائن</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
  }).join('')||'<div class="py-12 text-center space-y-3"><div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl"><i class="fa-solid fa-file-circle-question"></i></div><p class="text-sm font-bold text-slate-600">لا توجد قيود محاسبية مسجلة حالياً</p><button type="button" id="journal-empty-add" class="px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-xl">إضافة أول قيد محاسبي</button></div>';
+}
+function signedCashFlows(entries,accounts) {
+ const totals={operating:{in:0,out:0},investing:{in:0,out:0},financing:{in:0,out:0},other:{in:0,out:0}};
+ const liquid=id=>id==='110199'||id.startsWith('financial:');
+ for(const entry of entries){
+   const current=entry.lines.filter(line=>liquid(line.accountId));
+   const counterpart=entry.lines.filter(line=>!liquid(line.accountId));
+   const cash=current.reduce((net,line)=>net+line.debit-line.credit,0);
+   if(!cash)continue;
+   const label=line=>{
+     const account=accounts.get(line.accountId);
+     if(account?.category==='equity'||['22','2102'].some(prefix=>String(account?.code||'').startsWith(prefix)))return 'financing';
+     if(String(account?.code||'').startsWith('12'))return 'investing';
+     if(['invoices','purchases','returns','expenses'].includes(entry.source)||['revenue','expense'].includes(account?.category)||
+       /^110[346]|^210[13]/.test(String(account?.code||'')))return 'operating';
+     return 'other';
+   };
+   const categories=new Set(counterpart.map(label));
+   const tag=categories.size===1?[...categories][0]:'other';
+   totals[tag][cash>0?'in':'out']+=Math.abs(cash);
+ }
+ return totals;
+}
+function renderCashFlow(f){
+ const cutoff=$('as-of').value||nowDay(),start=$('income-from').value,year=$('fiscal-filter').value;
+ const all=$('income-scope').value==='company';
+ const accounts=new Map(S.companyAccounts||[]);
+ for(const account of S.accounts)accounts.set(account.id,account);
+ const entries=(all?S.companyEntries:f.entries).filter(entry=>entry.date<=cutoff&&(!start||entry.date>=start)&&(year==='all'||entry.financialYearId===year));
+ const totals=signedCashFlows(entries,accounts);
+ let net=0;
+ $('income-results').innerHTML=Object.entries({operating:'الأنشطة التشغيلية',investing:'الأنشطة الاستثمارية',financing:'الأنشطة التمويلية',other:'تدفقات تحتاج تصنيفاً'})
+  .map(([key,label])=>{
+    const amount=totals[key].in-totals[key].out;net+=amount;
+    return '<tr><th class="p-3 text-right">'+label+'</th><td class="p-3">'+moneyC(totals[key].in)+'</td><td class="p-3">'+moneyC(totals[key].out)+'</td><td class="p-3">'+moneyC(amount)+'</td></tr>';
+  }).join('')+'<tr><th class="p-3 text-right">صافي التدفقات النقدية</th><td colspan="3" class="p-3">'+moneyC(net)+'</td></tr>';
+}
+function renderIncome(f){
+ $('flow-head').hidden=$('income-type').value!=='flow';
+ if($('income-type').value==='flow')return renderCashFlow(f);
+ const all=$('income-scope').value==='company';
+ const cutoff=$('as-of').value||nowDay(),start=$('income-from').value;
+ const year=$('fiscal-filter').value;
+ const entries=(all?S.companyEntries:f.entries).filter(entry=>
+  entry.date<=cutoff&&(!start||entry.date>=start)&&(year==='all'||entry.financialYearId===year));
+ const accounts=new Map(S.companyAccounts||[]);
+ for(const account of S.accounts)accounts.set(account.id,account);
+ let revenue=0,expenses=0,cost=0;
+ for(const entry of entries)for(const line of entry.lines){
+   const category=accounts.get(line.accountId)?.category;
+   if(category==='revenue')revenue+=line.credit-line.debit;
+   if(category==='expense'&&line.accountId==='5104')cost+=line.debit-line.credit;
+   else if(category==='expense')expenses+=line.debit-line.credit;
+ }
+ $('income-results').innerHTML=[
+   ['صافي الإيرادات',revenue],['تكلفة المبيعات',cost],['مجمل الربح',revenue-cost],
+   ['المصروفات',expenses],['صافي نتيجة الفترة',revenue-cost-expenses]
+ ].map(([label,value])=>'<tr><th class="p-3 text-right">'+label+'</th><td class="p-3 text-left">'+moneyC(value)+'</td></tr>').join('');
+}
+function buildCompanyIncome(raw){
+ let manager=false;
+ try{const rt=parent.OscarActivation?.readRuntime?.();manager=rt?.type==='company-manager';}catch{}
+ $('income-scope').hidden=!manager;
+ if(!manager){S.companyEntries=[];$('income-scope').value='branch';return}
+ const rawBefore=S.raw,accountsBefore=S.accounts;
+ S.companyAccounts=new Map();
+ S.companyEntries=[];
+ try{
+   const ids=new Set(tableNames.flatMap(name=>(raw[name]||[]).map(normalizeBranch)));
+   for(const id of ids){
+     S.raw=scopeAccounting({...raw},id);
+     applyAccounts();
+     for(const account of S.accounts)S.companyAccounts.set(account.id,account);
+     S.companyEntries.push(...buildAutomaticEntries());
+   }
+ }finally{S.raw=rawBefore;S.accounts=accountsBefore}
 }
 function renderBalance(f){
  function rows(root){let out='';const walk=(id,depth)=>{for(const a of sortedChildren(id)){const val=f.balances[a.id]||0;const amount=moneyC(a.nature==='credit'?-val:val);out+=`<div class="flex items-center justify-between py-1.5 ${a.isGroup?'font-extrabold text-slate-800 border-b border-slate-100 mt-2':'text-slate-600 pr-4'}"><div class="flex items-center gap-2" style="padding-right:${depth*12}px"><span class="text-xs text-slate-400 tabular-nums">${escapeHtml(a.code)}</span><span>${escapeHtml(a.name)}</span></div><span class="tabular-nums ${a.isGroup?'text-slate-900':'font-semibold'}">${amount}</span></div>`;if(a.isGroup)walk(a.id,depth+1)}};walk(root,0);return out||'<p class="text-xs text-slate-400 py-2">لا توجد بنود مسجلة</p>'}
@@ -198,7 +292,7 @@ function showCoverage(){
  $('live-status').textContent=`${S.entries.filter(x=>!x.manual).length} قيد تلقائي + ${S.entries.filter(x=>x.manual).length} قيد يدوي من بيانات الشركة الحالية.`;
 }
 
-async function loadAll(){if(S.loading)return;S.loading=true;$('live-status').textContent='جارٍ تحميل السجلات الفعلية للشركة…';try{S.db?.close();S.db=await openDB();const pairs=await Promise.all(tableNames.map(async name=>[name,await readStore(S.db,name)]));S.raw=scopeAccounting(Object.fromEntries(pairs));S.warnings=[];applyAccounts();S.entries=buildAutomaticEntries();fillFiscalYears();showCoverage();render()}catch(e){console.error('[CashTop accounting]',e);showToast('خطأ في قراءة بيانات المحاسبة: '+e.message,true);$('live-status').textContent='تعذر قراءة قاعدة البيانات'}finally{S.loading=false}}
+async function loadAll(){if(S.loading)return;S.loading=true;$('live-status').textContent='جارٍ تحميل السجلات الفعلية للشركة…';try{S.db?.close();S.db=await openDB();const pairs=await Promise.all(tableNames.map(async name=>[name,await readStore(S.db,name)]));const raw=Object.fromEntries(pairs);S.raw=scopeAccounting({...raw});S.warnings=[];applyAccounts();S.entries=buildAutomaticEntries();buildCompanyIncome(raw);fillFiscalYears();showCoverage();render()}catch(e){console.error('[CashTop accounting]',e);showToast('خطأ في قراءة بيانات المحاسبة: '+e.message,true);$('live-status').textContent='تعذر قراءة قاعدة البيانات'}finally{S.loading=false}}
 function parentOptions(except=''){const banned=new Set([except]);const walk=id=>{for(const child of sortedChildren(id)){banned.add(child.id);walk(child.id)}};if(except)walk(except);return S.accounts.filter(a=>a.isGroup&&!a.dynamic&&!banned.has(a.id)).sort((a,b)=>a.code.localeCompare(b.code,undefined,{numeric:true})).map(a=>`<option value="${escapeHtml(a.id)}">${escapeHtml(a.code+' — '+a.name)}</option>`).join('')}
 function suggestCode(parentId){const p=accountById(parentId);if(!p)return'';const used=new Set(S.accounts.map(a=>a.code));for(let i=1;i<1000;i++){const code=p.code+(i<10?'0':'')+i;if(!used.has(code))return code}return p.code+'-'+uuid().slice(0,7)}
 function openAccount(parentId='11',edit=''){
@@ -267,10 +361,14 @@ async function reverseJournal(id){const orig=(S.raw.accounting_journal||[]).find
 function bind(){
  document.querySelectorAll('[data-tab]').forEach(x=>x.addEventListener('click',()=>setTab(x.dataset.tab)));
  $('as-of').value=nowDay();$('as-of').addEventListener('change',render);$('fiscal-filter').addEventListener('change',render);$('coa-search').addEventListener('input',()=>{if(S.tab==='coa')render()});$('journal-search').addEventListener('input',render);$('origin-filter').addEventListener('change',render);
+ $('hide-zero').addEventListener('change',render);
+ $('ledger-clear').addEventListener('click',()=>{S.ledgerAccount=null;render()});
+ $('income-scope').addEventListener('change',render);$('income-type').addEventListener('change',render);
+ $('income-from').addEventListener('change',render);
  $('new-account').addEventListener('click',()=>openAccount());$('new-journal').addEventListener('click',()=>newJournal());$('journal-add-inside').addEventListener('click',()=>newJournal());$('reload-data').addEventListener('click',loadAll);
  $('expand-all').addEventListener('click',()=>{S.expanded=new Set(S.accounts.filter(a=>a.isGroup).map(a=>a.id));render()});$('collapse-all').addEventListener('click',()=>{S.expanded.clear();render()});
  document.querySelectorAll('[data-close]').forEach(x=>x.addEventListener('click',()=>{const m=$(x.dataset.close);m.hidden=true;document.body.classList.remove('ct-modal-open')}));document.querySelectorAll('#account-modal,#journal-modal,#confirm-modal').forEach(x=>x.addEventListener('pointerdown',ev=>{if(ev.target===x){x.hidden=true;document.body.classList.remove('ct-modal-open')}}));
- $('coa-body').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;if(d.toggle){S.expanded.has(d.toggle)?S.expanded.delete(d.toggle):S.expanded.add(d.toggle);render()}else if(d.addchild)openAccount(d.addchild);else if(d.editaccount)openAccount('',d.editaccount);else if(d.deleteaccount)deleteAccount(d.deleteaccount);else if(d.withaccount)newJournal(d.withaccount)});
+ $('coa-body').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;if(d.ledger)showLedger(d.ledger);else if(d.toggle){S.expanded.has(d.toggle)?S.expanded.delete(d.toggle):S.expanded.add(d.toggle);render()}else if(d.addchild)openAccount(d.addchild);else if(d.editaccount)openAccount('',d.editaccount);else if(d.deleteaccount)deleteAccount(d.deleteaccount);else if(d.withaccount)newJournal(d.withaccount)});
  $('account-parent').addEventListener('change',()=>{if(!$('account-edit-id').value){$('account-code').value=suggestCode($('account-parent').value);$('account-nature').value=accountById($('account-parent').value)?.nature||'debit'}});$('account-group').addEventListener('change',()=>{const hide=$('account-group').value==='true'||!!$('account-edit-id').value;$('account-opening').disabled=hide;$('opening-balance-wrapper').classList.toggle('opacity-40',hide);$('opening-balance-hint').hidden=hide});$('account-form').addEventListener('submit',saveAccount);
  $('add-je-line').addEventListener('click',()=>{addLine();recalcJournal()});$('je-lines').addEventListener('click',e=>{if(e.target.closest('[data-remove-line]')){if($('je-lines').children.length<3)return showToast('القيد يتطلب سطرين على الأقل',true);e.target.closest('tr').remove();recalcJournal()}});
  $('je-description').addEventListener('input',recalcJournal);$('je-date').addEventListener('change',recalcJournal);$('save-je').addEventListener('click',saveJournal);

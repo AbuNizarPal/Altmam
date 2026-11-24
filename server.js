@@ -235,7 +235,7 @@ var persistTelegramState = () => {
   }
 };
 var parseChatIds = (v) => String(v || "").split(/[\s,;]+/).map((x) => x.trim()).filter(Boolean);
-var telegramConfig = () => ({ token: String(TELEGRAM_BOT_TOKEN || "").trim(), chatIds: parseChatIds(telegramState.config?.chatIds || "") });
+var telegramConfig = () => ({ token: String(TELEGRAM_BOT_TOKEN || "").trim(), chatIds: parseChatIds(telegramState.config?.chatIds || TELEGRAM_CHAT_IDS) });
 var telegramReady = () => {
   const c = telegramConfig();
   return !!(c.token && c.chatIds.length);
@@ -471,7 +471,7 @@ async function handleTelegram(req, res, origin) {
     if (action === "status") return sendJson(res, 200, { ok: true, configured: telegramReady(), dailyReportEnabled: !!telegramState.config.dailyReportEnabled, dailyBackupEnabled: !!telegramState.config.dailyBackupEnabled, lastDailyReportSentAt: telegramState.lastDailyReportSentAt || 0, lastDailyBackupSentAt: telegramState.lastDailyBackupSentAt || 0, hasSnapshot: !!telegramState.snapshot?.dailyPdfBase64 }, origin);
     if (action === "save_config") {
       const c = body.config || {}, prevR = !!telegramState.config.dailyReportEnabled, prevB = !!telegramState.config.dailyBackupEnabled;
-      telegramState.config = { ...telegramState.config, token: String(TELEGRAM_BOT_TOKEN || "").trim(), chatIds: String(c.chatIds ?? "").trim(), dailyReportEnabled: !!c.dailyReportEnabled, dailyBackupEnabled: !!c.dailyBackupEnabled };
+      telegramState.config = { ...telegramState.config, token: String(TELEGRAM_BOT_TOKEN || "").trim(), chatIds: String(c.chatIds ?? telegramState.config.chatIds ?? TELEGRAM_CHAT_IDS).trim(), dailyReportEnabled: !!c.dailyReportEnabled, dailyBackupEnabled: !!c.dailyBackupEnabled };
       const now = Date.now();
       if (!prevR && telegramState.config.dailyReportEnabled) telegramState.lastDailyReportSentAt = now;
       persistTelegramState();

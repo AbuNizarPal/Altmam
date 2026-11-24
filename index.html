@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl" class="theme-win10">
 <head>
-<link rel="stylesheet" href="./supplied-dashboard.css?v=25">
+<link rel="stylesheet" href="./supplied-dashboard.css?v=26">
 <link rel="stylesheet" href="./card-theme.css?v=21">
 <script id="ct-locale-boot">(function(){
  try{
@@ -26,7 +26,7 @@
   <link rel="manifest" href="./manifest.webmanifest" />
   <link href="./offline-fonts.css" rel="stylesheet" />
   <link rel="stylesheet" href="./app.css?v=7.9.4.179-half-shekel" />
-<script src="./oscar-activation-runtime.js?v=7.9.4.179-half-shekel"></script>
+<script src="./oscar-activation-runtime.js?v=26"></script>
   <script>
     try {
       const rt = window.OscarActivation?.readRuntime?.();
@@ -34,9 +34,9 @@
       document.title = "التمام برو";
     } catch (_) {}
   </script>
-  <script src="./oscar-cloud-sync.js?v=7.9.4.192-win10-r19-desktop-free-item"></script>
+  <script src="./oscar-cloud-sync.js?v=26"></script>
 
-<link rel="stylesheet" href="./windows10.css?v=20">
+<link rel="stylesheet" href="./windows10.css?v=26">
 <link rel="stylesheet" href="./branches.css?v=7.9.4.187-r14">
 <script src="./windows10-dialogs.js?v=14" defer></script>
 <link rel="stylesheet" href="./ct-google-translate.css?v=17">
@@ -62,7 +62,7 @@
   });
   async function setup() {
     try {
-      const reg = await navigator.serviceWorker.register('./sw.js?v=7.9.4.198-r25-dashboard-animation', {updateViaCache:'none'});
+      const reg = await navigator.serviceWorker.register('./sw.js?v=7.9.4.199-r26-altamam', {updateViaCache:'none'});
       reg.update().catch(() => {});
     } catch (error) { console.warn('OFFLINE_SETUP', error); }
   }
@@ -73,7 +73,7 @@
 </script>
   <script type="module">
     try {
-      await import('./main.js?v=7.9.4.198-r25-dashboard-animation');
+      await import('./main.js?v=7.9.4.199-r26-altamam');
     } catch (error) {
       console.error('OSCAR_BOOT_ERROR', error);
       const root = document.getElementById('root');

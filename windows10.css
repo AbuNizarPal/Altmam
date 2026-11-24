@@ -853,3 +853,41 @@
 @media screen and (max-width: 1023px) {
   #btn-pos-free-item.ct-pos-free-item-btn { display: none !important; }
 }
+
+@media (min-width: 1024px) {
+  .theme-win10[dir="rtl"] .ct-win-caption-controls {
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+  }
+}
+
+.ct-r26-overlay {
+  z-index: 50000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ct-r26-assistant {
+  width: min(94vw, 580px);
+}
+.ct-r26-message {
+  padding: 8px;
+  white-space: pre-wrap;
+}
+.ct-r26-message strong {
+  display: block;
+}
+@media (max-width: 767px) {
+  .theme-win10 #products-table-container tbody tr {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 90px) 34px !important;
+    padding-inline: 10px !important;
+  }
+  .theme-win10 #products-table-container td:nth-child(7) {
+    position: static !important;
+    grid-row: 1 / 3;
+    grid-column: 3;
+    justify-self: end;
+    align-self: center;
+    padding-inline: 0 !important;
+  }
+}
